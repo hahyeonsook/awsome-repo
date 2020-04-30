@@ -1,0 +1,10 @@
+{
+    "python.pythonPath": "C:\\Users\\h\\.virtualenvs\\awesome-api-course-Qs9DbpJT\\Scripts\\python.exe",
+    "python.formatting.provider": "black",
+    "python.linting.flake8Enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.enabled": true,
+    "python.linting.flake8Args": [
+        "--max-line-length=88"
+    ]
+}
