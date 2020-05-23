@@ -7,5 +7,6 @@ app_name = "users"
 # 모델별 기능? 작동을 먼저짬 GET, POST 등
 urlpatterns = [
     path("me/", views.MeView.as_view()),
+    path("me/favs/", views.FavsView.as_view()),
     path("<int:pk>/", views.user_detail),
 ]

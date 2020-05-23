@@ -1,10 +1,12 @@
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.views import APIView
 from rest_framework import status
 from .serializers import ReadUserSerializer, WriteUserSerializer
 from .models import User
+from rooms.models import Room
+from rooms.serializers import RoomSerializer
 
 # API에서 우리는 URL이 필요한데, 우리가 누군지 알기 위해서 우리의 PROFILE이 필요함.
 # 내 프로필과 유저 프로필을 분리한 이유는 유저 프로필은 유저의 아이디를 알아야 접근할 수 있는데
@@ -35,3 +37,32 @@ def user_detail(request, pk):
         return Response(ReadUserSerializer(user).data)
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+# DB의 state를 바꾸는 동작은 POST임.
+# 2개 이상의 api 동작이 있을 때는 클래스가 좋음.
+class FavsView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        serializer = RoomSerializer.get(user.favs.all(), many=True)
+        return Response(serializer)
+
+    # favs를 create하는 게 아니라 update하는 것이므로 put
+    def put(self, request):
+        pk = request.data.get("pk", None)
+        user = request.user
+        if pk is not None:
+            try:
+                room = Room.objects.get(pk=pk)
+                if room in user.favs.all():
+                    user.favs.remove(room)
+                else:
+                    user.favs.add(room)
+                # Response를 하지 않고 진행하면 실행이 잘 됐어도 마지막 400을 return함
+                return Response()
+            except Room.DoesNotExist:
+                pass
+        return Response(status=status.HTTP_400_BAD_REQUEST)
