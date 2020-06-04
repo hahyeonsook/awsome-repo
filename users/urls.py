@@ -8,6 +8,7 @@ app_name = "users"
 # View의 순서와 url 순서가 일치해야 함.
 urlpatterns = [
     path("", views.UsersView.as_view()),
+    path("token/", views.login),
     path("me/", views.MeView.as_view()),
     path("me/favs/", views.FavsView.as_view()),
     path("<int:pk>/", views.user_detail),

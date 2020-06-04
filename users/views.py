@@ -1,3 +1,6 @@
+import jwt
+from django.conf import settings
+from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
@@ -76,3 +79,23 @@ def user_detail(request, pk):
         return Response(UserSerializer(user).data)
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(["POST"])
+def login(request):
+    username = request.data.get("username")
+    password = request.data.get("password")
+    if not username or not password:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    user = authenticate(username=username, password=password)
+    if user is not None:
+        # 절대 절대! 민감한 정보를 jwt에 담아서는 안됨.
+        # jwt.io에서 누구나 암호를 풀 수 있다면 이걸 왜 사용하는 거지?
+        # 서버는 token을 받으면 볼 수 있는데, 서버는 token에 어떠한 변경사항이 하나라도 있었는지를 판단함.
+        # 우리가 신경쓰는 부분은 그 누구도 우리 token을 건들지 않았다는 것을 확인하는 것임.
+        encoded_jwt = jwt.encode(
+            {"pk": "user.pk"}, settings.SECRET_KEY, algorithm="HS256"
+        )
+        return Response(data={"token": encoded_jwt})
+    else:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
