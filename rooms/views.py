@@ -2,12 +2,12 @@ from rest_framework.generics import RetrieveAPIView
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import permissions
-from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import status
 from .models import Room
 from .serializers import RoomSerializer
+from .permissions import IsOwner
 
 
 class RoomViewSet(ModelViewSet):
@@ -21,6 +21,8 @@ class RoomViewSet(ModelViewSet):
             permission_classes = [permissions.IsAuthenticated]
         else:
             permission_classes = [IsOwner]
+
+        return [permission() for permission in permission_classes]
 
 
 @api_view(["GET"])
