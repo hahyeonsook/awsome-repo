@@ -146,3 +146,10 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
     ],
 }
+
+
+if not DEBUG:
+    REST_FRAMEWORK["DEFAULT_PAGINATION_CLASS"] = [
+        "rest_framework.renderers.JSONRenderer",
+    ]
+
