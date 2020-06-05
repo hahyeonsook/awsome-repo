@@ -6,6 +6,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.views import APIView
 from rest_framework import status
+from rest_framework.viewsets import ModelViewSet
+from rest_framework import permissions
 from .serializers import UserSerializer
 from .models import User
 from rooms.models import Room
@@ -17,14 +19,19 @@ from rooms.serializers import RoomSerializer
 # ?? 무슨소릴까.. 항상 앱 개발자처럼 생각해야 한다? 프론트 엔드처럼?? 프론트 엔드에서는 모른다는 얘긴가..
 
 
-class UsersView(APIView):
-    def post(self, request):
-        serializer = UserSerializer(request.data)
-        if serializer.is_valid():
-            new_user = serializer.save()
-            return Response(UserSerializer(new_user))
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class UserViewSet(ModelViewSet):
+
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get_permissions(self):
+        permission_classes = []
+        if self.action == "list":
+            permission_classes = [permissions.IsAdminUser]
+        elif self.action == "create" or self.action == "retrieve":
+            permission_classes = [permissions.AllowAny]
+
+        return [permission() for permission in permission_classes]
 
 
 class MeView(APIView):
